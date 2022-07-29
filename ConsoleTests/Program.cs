@@ -3,6 +3,10 @@ using System.Net;
 using System.Net.Sockets;
 using Gerk.AsyncThen;
 
+
+Console.WriteLine(IPEndPoint.Parse(new IPEndPoint(0x0a0a0a0a, 1000).ToString()));
+return;
+
 TcpListener tcpListener = new TcpListener(IPAddress.Any, 4444);
 tcpListener.Start();
 var aliceTask = tcpListener.AcceptTcpClientAsync();
@@ -10,7 +14,7 @@ var bobTask = tcpListener.AcceptTcpClientAsync();
 
 Task.WhenAll(aliceTask, bobTask).Then(x =>
 {
-	SecureRelay.SecureRelay.Relay(x[0].GetStream(), x[1].GetStream());
+	//SecureRelay.SecureRelay.Relay(x[0].GetStream(), x[1].GetStream());
 });
 
 

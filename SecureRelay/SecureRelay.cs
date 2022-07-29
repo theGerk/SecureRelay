@@ -8,26 +8,35 @@ namespace SecureRelay
 {
 	public static class SecureRelay
 	{
-		// Work in progress. Need to handle errors still and test.
-		public static async Task FromSecureToInsecure(Stream secure, RSACryptoServiceProvider localPrivateKey, IEnumerable<Identity> identities)
+		public static async Task FromSecureToInsecure(Stream encryptedInputStream, RSACryptoServiceProvider localPrivateKey, IEnumerable<IHasPublicKeySha> identities)
 		{
-			using var tunnel = Tunnel.Create(secure, localPrivateKey, identities, out Identity user, out TunnelCreationError error, out string errorMessege);
+			using var rawTunnel = Tunnel.Create(encryptedInputStream, localPrivateKey, identities, out IHasPublicKeySha user, out TunnelCreationError error, out string errorMessege);
+			using var safeTunnel = new SafeTunnel(rawTunnel);
 			if (error != TunnelCreationError.NoError)
 				return;
 
-			using var reader = new BinaryReader(secure);
+			using var reader = new BinaryReader(rawTunnel);
 			if (!IPEndPoint.TryParse(reader.ReadString(), out var endpoint))
 				return;
+			rawTunnel.FlushReader();
 
 			using var forward = new TcpClient(endpoint).GetStream();
-			await Relay(secure, forward);
+			await Relay(safeTunnel, forward);
 		}
 
-		public static async Task FromInsecureToSecure(Stream insecure, IPEndPoint target, RSACryptoServiceProvider localPrivateKey, IEnumerable<Identity> identities)
+		public static async Task FromInsecureToSecure(Stream clearTextInputStream, IPEndPoint target, IPEndPoint finalTarget, RSACryptoServiceProvider localPrivateKey, IEnumerable<IHasPublicKeySha> identities)
 		{
 			using var forwardedStream = new TcpClient(target).GetStream();
-			using var secure = Tunnel.Create(forwardedStream, localPrivateKey, identities, out Identity user, out TunnelCreationError error, out string errorMessege);
-			await Relay(insecure, secure);
+			using var rawTunnel = Tunnel.Create(forwardedStream, localPrivateKey, identities, out IHasPublicKeySha user, out TunnelCreationError error, out string errorMessege);
+			using var safeTunnel = new SafeTunnel(rawTunnel);
+			if (error != TunnelCreationError.NoError)
+				return;
+
+			using var writer = new BinaryWriter(rawTunnel);
+			writer.Write(finalTarget.ToString());
+			rawTunnel.FlushWriter();
+
+			await Relay(clearTextInputStream, safeTunnel);
 		}
 
 		private static Task Relay(Stream alice, Stream bob)

@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace SecureRelay
 {
-	public interface Identity : Gerk.Crypto.EncryptedTransfer.IHasPublicKeySha
+	internal class SecureRelayServer
 	{
-
 	}
 }
