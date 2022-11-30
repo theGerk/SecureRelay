@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureRelay", "SecureRelay\SecureRelay.csproj", "{D2C197C1-6901-4628-AE91-326AEA2E3E95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecureRelay", "SecureRelay\SecureRelay.csproj", "{D2C197C1-6901-4628-AE91-326AEA2E3E95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTests", "ConsoleTests\ConsoleTests.csproj", "{1D6849C6-0984-4C54-972D-4E9C3098C2C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTests", "ConsoleTests\ConsoleTests.csproj", "{1D6849C6-0984-4C54-972D-4E9C3098C2C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecureRelayServer", "SecureRelayServer\SecureRelayServer.csproj", "{1AA5ED26-C27D-4C42-BD27-736A1DFE94AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureRelayClient", "SecureRelayClient\SecureRelayClient.csproj", "{2B9A06EA-9B5D-4151-8075-C8DCDA1AC457}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{1D6849C6-0984-4C54-972D-4E9C3098C2C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D6849C6-0984-4C54-972D-4E9C3098C2C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D6849C6-0984-4C54-972D-4E9C3098C2C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AA5ED26-C27D-4C42-BD27-736A1DFE94AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AA5ED26-C27D-4C42-BD27-736A1DFE94AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AA5ED26-C27D-4C42-BD27-736A1DFE94AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AA5ED26-C27D-4C42-BD27-736A1DFE94AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B9A06EA-9B5D-4151-8075-C8DCDA1AC457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B9A06EA-9B5D-4151-8075-C8DCDA1AC457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B9A06EA-9B5D-4151-8075-C8DCDA1AC457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B9A06EA-9B5D-4151-8075-C8DCDA1AC457}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
