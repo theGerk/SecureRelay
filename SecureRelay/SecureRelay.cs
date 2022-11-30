@@ -20,13 +20,17 @@ namespace SecureRelay
 				return;
 			rawTunnel.FlushReader();
 
-			using var forward = new TcpClient(endpoint).GetStream();
+			using var f = new TcpClient();
+			await f.ConnectAsync(endpoint);
+			using var forward = f.GetStream();
 			await Relay(safeTunnel, forward);
 		}
 
 		public static async Task FromInsecureToSecure(Stream clearTextInputStream, IPEndPoint target, IPEndPoint finalTarget, RSACryptoServiceProvider localPrivateKey, IEnumerable<IHasPublicKeySha> identities)
 		{
-			using var forwardedStream = new TcpClient(target).GetStream();
+			using var f = new TcpClient();
+			f.Connect(target);
+			using var forwardedStream = f.GetStream();
 			using var rawTunnel = Tunnel.Create(forwardedStream, localPrivateKey, identities, out IHasPublicKeySha user, out TunnelCreationError error, out string errorMessege);
 			using var safeTunnel = new SafeTunnel(rawTunnel);
 			if (error != TunnelCreationError.NoError)

@@ -1,21 +1,30 @@
 ﻿
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using Gerk.AsyncThen;
+using Gerk.Crypto.EncryptedTransfer;
+using SecureRelay;
 
 
-Console.WriteLine(IPEndPoint.Parse(new IPEndPoint(0x0a0a0a0a, 1000).ToString()));
-return;
+RSACryptoServiceProvider clientKey = new RSACryptoServiceProvider();
+RSACryptoServiceProvider serverKey = new RSACryptoServiceProvider();
 
-TcpListener tcpListener = new TcpListener(IPAddress.Any, 4444);
+TcpListener tcpListener = new TcpListener(IPAddress.Loopback, 2221);
 tcpListener.Start();
-var aliceTask = tcpListener.AcceptTcpClientAsync();
-var bobTask = tcpListener.AcceptTcpClientAsync();
 
-Task.WhenAll(aliceTask, bobTask).Then(x =>
-{
-	//SecureRelay.SecureRelay.Relay(x[0].GetStream(), x[1].GetStream());
-});
+SecureRelayServer secureRelayServer = SecureRelayServer.Start(new IPEndPoint(IPAddress.Loopback, 2222), serverKey, new[] { new rsahaspublickeysha(clientKey) });
+SecureRelayClient secureRelayClient = SecureRelayClient.Start(
+	new IPEndPoint(IPAddress.Loopback, 2223),
+	new IPEndPoint(IPAddress.Loopback, 2222),
+	new IPEndPoint(IPAddress.Loopback, 2221),
+	clientKey,
+	new[] { new rsahaspublickeysha(serverKey) }
+);
+
+TcpClient tcpClient = new();
+tcpClient.Connect(IPAddress.Loopback, 2223);
+var aliceStream = tcpClient.GetStream();
 
 
 object lck = new();
@@ -23,26 +32,24 @@ object lck = new();
 
 var aliceThread = new Thread(() =>
 {
-	var clinet = new TcpClient();
-	clinet.Connect(IPAddress.Loopback, 4444);
-	using var strm = clinet.GetStream();
+	using var strm = aliceStream;
 	using var writer = new BinaryWriter(strm);
 	writer.Write("This is alice, is bob there?");
 	using var reader = new BinaryReader(strm);
+	var text = reader.ReadString();
 	lock (lck)
-		Console.WriteLine("to ALICE from BOB: " + reader.ReadString());
+		Console.WriteLine("to ALICE from BOB: " + text);
 
 });
 
 
 var bobThread = new Thread(() =>
 {
-	var client = new TcpClient();
-	client.Connect(IPAddress.Loopback, 4444);
-	using var stream = client.GetStream();
+	using var stream = tcpListener.AcceptTcpClient().GetStream();
 	using var reader = new BinaryReader(stream);
+	var text = reader.ReadString();
 	lock (lck)
-		Console.WriteLine("to BOB from ALICE: " + reader.ReadString());
+		Console.WriteLine("to BOB from ALICE: " + text);
 	using var writer = new BinaryWriter(stream);
 	writer.Write("Listen here you fuck, I told you not to talk to me any more!");
 });
@@ -53,3 +60,18 @@ bobThread.Start();
 
 aliceThread.Join();
 bobThread.Join();
+
+
+public class rsahaspublickeysha : IHasPublicKeySha, IDisposable
+{
+	public RSACryptoServiceProvider RSA { get; set; }
+
+	public rsahaspublickeysha(RSACryptoServiceProvider rSACryptoServiceProvider)
+	{
+		RSA = rSACryptoServiceProvider;
+	}
+
+	public byte[] GetPublicKeySha() => SHA256.HashData(RSA.ExportCspBlob(false));
+
+	public void Dispose() => RSA.Dispose();
+}
