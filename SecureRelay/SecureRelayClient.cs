@@ -40,6 +40,7 @@ namespace SecureRelay
 		private async void Run(IPEndPoint listeningIp, IPEndPoint secureRemoteServer, IPEndPoint finalIpTarget, RSACryptoServiceProvider myKey, IEnumerable<IHasPublicKeySha> validTargets)
 		{
 			var tcpListener = new TcpListener(listeningIp);
+			tcpListener.Start();
 
 			while (active)
 			{
