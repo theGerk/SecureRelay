@@ -45,8 +45,23 @@ namespace SecureRelay
 
 		private static Task Relay(Stream alice, Stream bob)
 		{
-			Task aliceToBob = bob.CopyToAsync(alice);
-			Task bobToAlice = alice.CopyToAsync(bob);
+			Task run(Stream from, Stream to)
+			{
+				return Task.Run(() =>
+				{
+					byte[] buff = new byte[4096];
+					while (true)
+					{
+						int len = from.Read(buff, 0, buff.Length);
+						if (len <= 0)
+							break;
+						to.Write(buff, 0, len);
+					}
+				});
+			}
+
+			Task aliceToBob = run(alice, bob);
+			Task bobToAlice = run(bob, alice);
 			return Task.WhenAll(aliceToBob, bobToAlice);
 		}
 	}
