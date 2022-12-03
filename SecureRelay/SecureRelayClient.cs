@@ -28,14 +28,14 @@ namespace SecureRelay
 
 		private SecureRelayClient() { }
 
-		public static SecureRelayClient Start(IPEndPoint listeningIp, IPEndPoint targetIp, IPEndPoint finalIpTarget, RSACryptoServiceProvider myKey, IEnumerable<IHasPublicKeySha> validTargets)
+		public static SecureRelayClient Start(IPEndPoint listeningIp, IPEndPoint targetIp, IPEndPoint finalIpTarget, RSACryptoServiceProvider myKey, IEnumerable<IHasPublicKeySha> validTargets, Action<TunnelCreationError, string> handleEncryptionError = null)
 		{
 			var output = new SecureRelayClient();
-			output.Run(listeningIp, targetIp, finalIpTarget, myKey, validTargets);
+			output.Run(listeningIp, targetIp, finalIpTarget, myKey, validTargets, handleEncryptionError);
 			return output;
 		}
 
-		private async void Run(IPEndPoint listeningIp, IPEndPoint secureRemoteServer, IPEndPoint finalIpTarget, RSACryptoServiceProvider myKey, IEnumerable<IHasPublicKeySha> validTargets)
+		private async void Run(IPEndPoint listeningIp, IPEndPoint secureRemoteServer, IPEndPoint finalIpTarget, RSACryptoServiceProvider myKey, IEnumerable<IHasPublicKeySha> validTargets, Action<TunnelCreationError, string> handleEncryptionError)
 		{
 			var tcpListener = new TcpListener(listeningIp);
 			tcpListener.Start();
@@ -46,7 +46,7 @@ namespace SecureRelay
 			WhenConnectedTaskSource.SetResult();
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-			SecureRelay.FromInsecureToSecure(localInsecureConnection.GetStream(), secureRemoteServer, finalIpTarget, myKey, validTargets)
+			SecureRelay.FromInsecureToSecure(localInsecureConnection.GetStream(), secureRemoteServer, finalIpTarget, myKey, validTargets, handleEncryptionError)
 				.Then(() => {
 					CurrentState = State.Closed;
 					WhenCompletedTaskSource.SetResult();

@@ -13,7 +13,7 @@ RSACryptoServiceProvider serverKey = new RSACryptoServiceProvider();
 TcpListener tcpListener = new TcpListener(IPAddress.Loopback, 2221);
 tcpListener.Start();
 
-SecureRelayServer secureRelayServer = SecureRelayServer.Start(new IPEndPoint(IPAddress.Loopback, 2222), serverKey, new[] { new rsahaspublickeysha(clientKey) });
+SecureRelayServer secureRelayServer = SecureRelayServer.Start(new IPEndPoint(IPAddress.Loopback, 2222), serverKey, new[] { new rsahaspublickeysha(clientKey) }, (_, _) => true);
 SecureRelayClient secureRelayClient = SecureRelayClient.Start(
 	new IPEndPoint(IPAddress.Loopback, 2223),
 	new IPEndPoint(IPAddress.Loopback, 2222),

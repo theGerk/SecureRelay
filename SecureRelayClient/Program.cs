@@ -5,14 +5,16 @@ using SecureRelay;
 
 namespace SecureClient
 {
-	internal class Program
+	public static class Program
 	{
-		static void Main(string[] args)
+		/// <summary>
+		/// Starts a server 
+		/// </summary>
+		/// <param name="listen"></param>
+		/// <param name="target"></param>
+		public static void Main(int listen, string target)
 		{
-			var key = new RSACryptoServiceProvider();
-			SecureRelayClient client = SecureRelayClient.Start(new IPEndPoint(IPAddress.Loopback, 9092), new IPEndPoint(IPAddress.Loopback, 9090), new IPEndPoint(IPAddress.Loopback, 9091), key, null);
-			System.Threading.Thread.Sleep(-1);
-
+			
 		}
 	}
 }
